@@ -7,14 +7,15 @@ import (
 	"strings"
 )
 
-// Open returns a file-like object that can be read and closed much
-// like os.Open. Based on name, it can be,
+// Open opens a file for transparent sequential reading. The returned
+// object can be read and closed much like os.Open. Based on name, it
+// can be,
 //
 // - os.Stdin, when name is "-";
 //
 // - A *gzip.Reader wrapped around a Closer that closes both it and its
 // underlying file, when name has prefix ".gz";
-
+//
 // - A normal *os.File otherwise.
 func Open(name string) (io.ReadCloser, error) {
 	if name == "-" {
@@ -36,8 +37,9 @@ func Open(name string) (io.ReadCloser, error) {
 	}
 }
 
-// Create returns a file-like object that can be written and closed
-// much like os.Create. Based on name, it can be,
+// Create opens a file for transparent sequential writing. The
+// returned object can be written and closed much like
+// os.Create. Based on name, it can be,
 //
 // - os.Stdout, when name is "-";
 //
