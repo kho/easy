@@ -11,6 +11,12 @@ type Cmd struct {
 	Action func(args []string)
 }
 
+// SubCmd selects the given subcommand named by the first command line
+// argument next to the command name and runs the command by passing
+// the rest of the command line arguments. The subcommand name "help"
+// is reserved for the built-in subcommand for listing available
+// subcommands and should not be used (m["help"] is silently
+// over-ridden if a user-specified "help" subcommand is given).
 func SubCmd(m map[string]Cmd) {
 	prog := os.Args[0]
 	m["help"] = Cmd{"list available subcommands", func(_ []string) { printUsage(prog, m) }}
