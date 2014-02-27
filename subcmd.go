@@ -13,13 +13,10 @@ type Cmd struct {
 
 // SubCmd selects the given subcommand named by the first command line
 // argument next to the command name and runs the command by passing
-// the rest of the command line arguments. The subcommand name "help"
-// is reserved for the built-in subcommand for listing available
-// subcommands and should not be used (m["help"] is silently
-// over-ridden if a user-specified "help" subcommand is given).
+// the rest of the command line arguments. When no subcommand is
+// given, a list of available subcommands are printed to stderr.
 func SubCmd(m map[string]Cmd) {
 	prog := os.Args[0]
-	m["help"] = Cmd{"list available subcommands", func(_ []string) { printUsage(prog, m) }}
 	if len(os.Args) <= 1 {
 		printUsage(prog, m)
 		os.Exit(1)
@@ -27,7 +24,7 @@ func SubCmd(m map[string]Cmd) {
 	cmd := os.Args[1]
 	sub, ok := m[cmd]
 	if !ok {
-		fmt.Fprintf(os.Stderr, "Unrecognized subcommand: %q\n", cmd)
+		fmt.Fprintf(os.Stderr, "Unrecognized subcommand: %q\nRun without arguments to see available subcommands.\n", cmd)
 		os.Exit(1)
 	}
 	sub.Action(os.Args[2:])
