@@ -101,3 +101,21 @@ func (a alsoCloseWriteCloser) Close() error {
 	}
 	return nil
 }
+
+// MustOpen tries to Open(name) and panics if it fails.
+func MustOpen(name string) io.ReadCloser {
+	r, err := Open(name)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
+// MustCreate tries to Create(name) and panics if it fails.
+func MustCreate(name string) io.WriteCloser {
+	w, err := Create(name)
+	if err != nil {
+		panic(err)
+	}
+	return w
+}
