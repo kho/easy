@@ -16,7 +16,7 @@ func ForEachLine(r io.Reader, f func(string) error) error {
 	return s.Err()
 }
 
-func ForEachLineBytes(r io.Reader, f func([]byte) error) error {
+func ForEachByteLine(r io.Reader, f func([]byte) error) error {
 	s := bufio.NewScanner(r)
 	for s.Scan() {
 		if err := f(s.Bytes()); err != nil {
@@ -38,9 +38,9 @@ func ForEachLineN(r io.Reader, every int, f func(string) error) error {
 	})
 }
 
-func ForEachLineBytesN(r io.Reader, every int, f func([]byte) error) error {
+func ForEachByteLineN(r io.Reader, every int, f func([]byte) error) error {
 	n := 0
-	return ForEachLineBytes(r, func(x []byte) error {
+	return ForEachByteLine(r, func(x []byte) error {
 		err := f(x)
 		n++
 		if n%every == 0 {
