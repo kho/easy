@@ -33,6 +33,7 @@ func Open(name string) (io.ReadCloser, error) {
 		if strings.HasSuffix(name, ".gz") {
 			r, err := gzip.NewReader(f)
 			if err != nil {
+				f.Close()
 				return nil, err
 			}
 			return &alsoCloseReadCloser{r, f}, nil
@@ -52,7 +53,7 @@ func Open(name string) (io.ReadCloser, error) {
 // - os.Stdout, when name is "-";
 //
 // - A *gzip.Writer wrapped around a Closer that closes both it and
-// its underlying file, when name has prefix ".gz";
+// its underlying file, when name has suffix ".gz";
 //
 // - Because there is no bzip2 compressor at this moment, creating a
 // ".bz2" file results in an error;
@@ -61,6 +62,8 @@ func Open(name string) (io.ReadCloser, error) {
 func Create(name string) (io.WriteCloser, error) {
 	if name == "-" {
 		return os.Stdout, nil
+	} else if strings.HasSuffix(name, ".bz2") {
+		return nil, noBz2Error
 	} else {
 		f, err := os.Create(name)
 		if err != nil {
@@ -69,8 +72,6 @@ func Create(name string) (io.WriteCloser, error) {
 		if strings.HasSuffix(name, ".gz") {
 			w := gzip.NewWriter(f)
 			return &alsoCloseWriteCloser{w, f}, nil
-		} else if strings.HasSuffix(name, ".bz2") {
-			return nil, noBz2Error
 		} else {
 			return f, nil
 		}
