@@ -90,11 +90,13 @@ func (a *alsoCloseReadCloser) Read(p []byte) (int, error) {
 }
 
 func (a *alsoCloseReadCloser) Close() error {
-	if err := a.top.Close(); err != nil {
-		return err
+	err1 := a.top.Close()
+	err2 := a.bottom.Close()
+	if err1 != nil {
+		return err1
 	}
-	if err := a.bottom.Close(); err != nil {
-		return err
+	if err2 != nil {
+		return err2
 	}
 	return nil
 }
@@ -122,11 +124,13 @@ func (a *alsoCloseWriteCloser) Write(p []byte) (int, error) {
 }
 
 func (a *alsoCloseWriteCloser) Close() error {
-	if err := a.top.Close(); err != nil {
-		return err
+	err1 := a.top.Close()
+	err2 := a.bottom.Close()
+	if err1 != nil {
+		return err1
 	}
-	if err := a.bottom.Close(); err != nil {
-		return err
+	if err2 != nil {
+		return err2
 	}
 	return nil
 }
