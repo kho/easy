@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 )
 
 type Cmd struct {
@@ -30,7 +31,8 @@ func SubCmd(m map[string]Cmd) {
 
 	// Show list of available commands when there is no argument.
 	if len(os.Args) <= 1 {
-		printUsage(prog, m)
+		fmt.Fprintf(os.Stderr, "Available subcommands of %s:\n", prog)
+		printUsage(m, "")
 		os.Exit(1)
 	}
 
@@ -38,17 +40,19 @@ func SubCmd(m map[string]Cmd) {
 	cmd := os.Args[1]
 	sub, ok := m[cmd]
 	if !ok {
-		fmt.Fprintf(os.Stderr, "Unrecognized subcommand: %q\nRun without arguments to see available subcommands.\n", cmd)
+		fmt.Fprintf(os.Stderr, "Unrecognized subcommand: %q. Run without arguments to see available subcommands. These subcommands partially match yours:\n", cmd)
+		printUsage(m, cmd)
 		os.Exit(1)
 	}
 	sub.Action(os.Args[2:])
 }
 
-func printUsage(prog string, m map[string]Cmd) {
-	fmt.Fprintf(os.Stderr, "Available subcommands of %s:\n", prog)
+func printUsage(m map[string]Cmd, pat string) {
 	names := []string{}
 	for name := range m {
-		names = append(names, name)
+		if strings.Contains(name, pat) {
+			names = append(names, name)
+		}
 	}
 	sort.Strings(names)
 	for _, name := range names {
@@ -66,7 +70,8 @@ func newHelp(prog string, m map[string]Cmd) Cmd {
 		`Without an argument, "help" lists all available subcommands. Otherwise, it describes the subcommand specified by the first argument.`,
 		func(args []string) {
 			if len(args) == 0 {
-				printUsage(prog, m)
+				fmt.Fprintf(os.Stderr, "Available subcommands of %s:\n", prog)
+				printUsage(m, "")
 			} else {
 				cmd := args[0]
 				sub, ok := m[cmd]
