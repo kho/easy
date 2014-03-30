@@ -30,3 +30,9 @@ func SortWithIndex(sorter sort.Interface) []int {
 	sort.Sort(wi)
 	return wi.NewToOld
 }
+
+type Reverse struct{ Sorter sort.Interface }
+
+func (s Reverse) Len() int           { return s.Sorter.Len() }
+func (s Reverse) Less(i, j int) bool { return !s.Sorter.Less(i, j) }
+func (s Reverse) Swap(i, j int)      { s.Sorter.Swap(i, j) }
