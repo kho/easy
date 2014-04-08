@@ -2,31 +2,54 @@ package easy
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 )
 
-func ForEachLine(r io.Reader, f func(string) error) error {
+type LineError struct {
+	Num  int    // 1-based line number.
+	Line string // the actual line.
+	Err  error  // the error.
+}
+
+func (e *LineError) Error() string {
+	return fmt.Sprintf("line %d: %v: %q", e.Num, e.Err, e.Line)
+}
+
+func ForEachLine(r io.Reader, f func(string) error) *LineError {
 	s := bufio.NewScanner(r)
+	n := 0
 	for s.Scan() {
+		n++
 		if err := f(s.Text()); err != nil {
-			return err
+			return &LineError{n, s.Text(), err}
 		}
 	}
-	return s.Err()
+	if err := s.Err(); err != nil {
+		return &LineError{-1, "", err}
+	} else {
+		return nil
+	}
 }
 
-func ForEachByteLine(r io.Reader, f func([]byte) error) error {
+func ForEachByteLine(r io.Reader, f func([]byte) error) *LineError {
 	s := bufio.NewScanner(r)
+	n := 0
 	for s.Scan() {
+		n++
 		if err := f(s.Bytes()); err != nil {
-			return err
+			return &LineError{n, s.Text(), err}
 		}
 	}
-	return s.Err()
+	if err := s.Err(); err != nil {
+		return &LineError{-1, "", err}
+	} else {
+		return nil
+	}
 }
 
-func ForEachLineN(r io.Reader, every int, f func(string) error) error {
+func ForEachLineN(r io.Reader, every int, f func(string) error) *LineError {
 	n := 0
 	return ForEachLine(r, func(x string) error {
 		err := f(x)
@@ -38,7 +61,7 @@ func ForEachLineN(r io.Reader, every int, f func(string) error) error {
 	})
 }
 
-func ForEachByteLineN(r io.Reader, every int, f func([]byte) error) error {
+func ForEachByteLineN(r io.Reader, every int, f func([]byte) error) *LineError {
 	n := 0
 	return ForEachByteLine(r, func(x []byte) error {
 		err := f(x)
