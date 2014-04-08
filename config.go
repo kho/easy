@@ -52,6 +52,8 @@ func SetArgs(ptr interface{}, args []string) error {
 	return nil
 }
 
+// ParseFlagsAndArgs parses the standard flags and then sets the
+// arguments to ptr.
 func ParseFlagsAndArgs(ptr interface{}) {
 	flag.Usage = func() {
 		CombinedUsage(os.Args[0], ptr, flag.PrintDefaults)
@@ -64,7 +66,13 @@ func ParseFlagsAndArgs(ptr interface{}) {
 	}
 }
 
+// ParseFlagsAndArgsWith parses a specified flagset and the sets the
+// arguments to ptr. The flagset may be nil, in which case no flags
+// except -h are processed.
 func ParseFlagsAndArgsWith(name string, ptr interface{}, fs *flag.FlagSet, args []string) error {
+	if fs == nil {
+		fs = flag.NewFlagSet("", 0)
+	}
 	fs.Usage = func() {
 		CombinedUsage(name, ptr, fs.PrintDefaults)
 	}
