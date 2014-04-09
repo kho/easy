@@ -17,7 +17,7 @@ func (e *LineError) Error() string {
 	return fmt.Sprintf("line %d: %v: %q", e.Num, e.Err, e.Line)
 }
 
-func ForEachLine(r io.Reader, f func(string) error) *LineError {
+func ForEachLine(r io.Reader, f func(string) error) error {
 	s := bufio.NewScanner(r)
 	n := 0
 	for s.Scan() {
@@ -33,7 +33,7 @@ func ForEachLine(r io.Reader, f func(string) error) *LineError {
 	}
 }
 
-func ForEachByteLine(r io.Reader, f func([]byte) error) *LineError {
+func ForEachByteLine(r io.Reader, f func([]byte) error) error {
 	s := bufio.NewScanner(r)
 	n := 0
 	for s.Scan() {
@@ -49,7 +49,7 @@ func ForEachByteLine(r io.Reader, f func([]byte) error) *LineError {
 	}
 }
 
-func ForEachLineN(r io.Reader, every int, f func(string) error) *LineError {
+func ForEachLineN(r io.Reader, every int, f func(string) error) error {
 	n := 0
 	return ForEachLine(r, func(x string) error {
 		err := f(x)
@@ -61,7 +61,7 @@ func ForEachLineN(r io.Reader, every int, f func(string) error) *LineError {
 	})
 }
 
-func ForEachByteLineN(r io.Reader, every int, f func([]byte) error) *LineError {
+func ForEachByteLineN(r io.Reader, every int, f func([]byte) error) error {
 	n := 0
 	return ForEachByteLine(r, func(x []byte) error {
 		err := f(x)
