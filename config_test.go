@@ -2,6 +2,7 @@ package easy
 
 import (
 	"flag"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -29,6 +30,11 @@ type badConfig struct {
 	Bool bool
 	// Not OK.
 	Struct struct{ N, M int }
+}
+
+type sliceConfig struct {
+	First int
+	Rest  []int
 }
 
 func TestAddFlags(t *testing.T) {
@@ -117,6 +123,49 @@ func TestAddFlags(t *testing.T) {
 			t.Errorf("error in parsing flags: %v", err)
 		} else if x.String != "not ok" {
 			t.Errorf("-string is set to %q; expected %q", x.String, "not ok")
+		}
+	}()
+}
+
+func TestSetArgs(t *testing.T) {
+	// Simple case.
+	func() {
+		var c goodConfig
+		if err := SetArgs(&c, []string{"true", "1", "2", "3", "s", "5", "6", "true", "8"}); err != nil {
+			t.Error("unexpected error: ", err)
+		} else {
+			y := goodConfig{true, 1, 2, 3, "s", 5, 6, true, 8, 0}
+			if c != y {
+				t.Errorf("expected %+v; got %+v", y, c)
+			}
+		}
+	}()
+	// Slice.
+	func() {
+		var c sliceConfig
+		if err := SetArgs(&c, []string{"1", "2", "3"}); err != nil {
+			t.Error("unexpected error: ", err)
+		} else {
+			y := sliceConfig{1, []int{2, 3}}
+			if !reflect.DeepEqual(c, y) {
+				t.Errorf("expected %+v; got %+v", y, c)
+			}
+		}
+		if err := SetArgs(&c, []string{"4", "5"}); err != nil {
+			t.Error("unexpected error: ", err)
+		} else {
+			y := sliceConfig{4, []int{5}}
+			if !reflect.DeepEqual(c, y) {
+				t.Errorf("expected %+v; got %+v", y, c)
+			}
+		}
+		if err := SetArgs(&c, []string{"6"}); err != nil {
+			t.Error("unexpected error: ", err)
+		} else {
+			y := sliceConfig{6, []int{}}
+			if !reflect.DeepEqual(c, y) {
+				t.Errorf("expected %+v; got %+v", y, c)
+			}
 		}
 	}()
 }
