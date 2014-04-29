@@ -62,6 +62,7 @@ func ParseFlagsAndArgs(ptr interface{}) {
 	}
 	// When using glog, I would like to log to stderr by default.
 	if f := flag.Lookup("logtostderr"); f != nil {
+		f.Value.Set("true")
 		f.DefValue = "true"
 	}
 	flag.Parse()
