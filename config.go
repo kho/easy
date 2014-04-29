@@ -53,12 +53,21 @@ func SetArgs(ptr interface{}, args []string) error {
 }
 
 // ParseFlagsAndArgs parses the standard flags and then sets the
-// arguments to ptr.
+// arguments to ptr. When ptr is nil, flags are still parsed but no
+// arguments will be procssed. This does certain magic with flags as
+// well (e.g. tweaking glog).
 func ParseFlagsAndArgs(ptr interface{}) {
 	flag.Usage = func() {
 		CombinedUsage(os.Args[0], ptr, flag.PrintDefaults)
 	}
+	// When using glog, I would like to log to stderr by default.
+	if f := flag.Lookup("logtostderr"); f != nil {
+		f.DefValue = "true"
+	}
 	flag.Parse()
+	if ptr == nil {
+		return
+	}
 	if err := SetArgs(ptr, flag.Args()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		flag.Usage()
@@ -68,7 +77,8 @@ func ParseFlagsAndArgs(ptr interface{}) {
 
 // ParseFlagsAndArgsWith parses a specified flagset and the sets the
 // arguments to ptr. The flagset may be nil, in which case no flags
-// except -h are processed.
+// except -h are processed. ptr may also be nil, in which case no
+// arguments will be processed.
 func ParseFlagsAndArgsWith(name string, ptr interface{}, fs *flag.FlagSet, args []string) error {
 	if fs == nil {
 		fs = flag.NewFlagSet("", 0)
@@ -78,6 +88,9 @@ func ParseFlagsAndArgsWith(name string, ptr interface{}, fs *flag.FlagSet, args 
 	}
 	if err := fs.Parse(args); err != nil {
 		return err
+	}
+	if ptr == nil {
+		return nil
 	}
 	return SetArgs(ptr, fs.Args())
 }
