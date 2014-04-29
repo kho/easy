@@ -65,9 +65,6 @@ func ParseFlagsAndArgs(ptr interface{}) {
 		f.DefValue = "true"
 	}
 	flag.Parse()
-	if ptr == nil {
-		return
-	}
 	if err := SetArgs(ptr, flag.Args()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		flag.Usage()
@@ -88,9 +85,6 @@ func ParseFlagsAndArgsWith(name string, ptr interface{}, fs *flag.FlagSet, args 
 	}
 	if err := fs.Parse(args); err != nil {
 		return err
-	}
-	if ptr == nil {
-		return nil
 	}
 	return SetArgs(ptr, fs.Args())
 }
@@ -128,6 +122,9 @@ func PrintArguments(ptr interface{}) {
 }
 
 func forEachField(ptr interface{}, action func(reflect.StructField, reflect.Value) error) error {
+	if ptr == nil {
+		return nil
+	}
 	ptrValue := reflect.ValueOf(ptr)
 	if ptrValue.Kind() != reflect.Ptr {
 		panic(fmt.Sprintf("required pointer to struct; got %v", ptrValue))
