@@ -41,7 +41,7 @@ func (c *stringChoice) Set(v string) error {
 			return nil
 		}
 	}
-	return errors.New(fmt.Sprintf("not one from %q", c.Valid))
+	return errors.New(fmt.Sprintf("not one of %q", c.Valid))
 }
 
 func StringChoice(name string, value string, usage string, choices []string) *string {
