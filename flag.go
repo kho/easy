@@ -44,8 +44,10 @@ func (c *stringChoice) Set(v string) error {
 	return errors.New(fmt.Sprintf("not one of %q", c.Valid))
 }
 
-func StringChoice(name string, value string, usage string, choices []string) *string {
-	f := &stringChoice{choices, value}
+// StringChoice creates a global string flag whose value must be one
+// of choices. The first of choices is used as the default value.
+func StringChoice(name string, choices []string, usage string) *string {
+	f := &stringChoice{choices, choices[0]}
 	flag.Var(f, name, fmt.Sprintf("%s (one of %q)", usage, choices))
 	return &f.Value
 }
@@ -73,8 +75,10 @@ func (c *intChoice) Set(v string) error {
 	return errors.New(fmt.Sprintf("not one of %q", c.Valid))
 }
 
-func IntChoice(name string, value int, usage string, choices []int) *int {
-	f := &intChoice{choices, value}
+// IntChoice creates a global integer flag whose value must be one of
+// choices. The first of choices is used as the default value.
+func IntChoice(name string, choices []int, usage string) *int {
+	f := &intChoice{choices, choices[0]}
 	flag.Var(f, name, fmt.Sprintf("%s (one of %q)", usage, choices))
 	return &f.Value
 }
