@@ -9,7 +9,22 @@ import (
 	"strconv"
 	"strings"
 	"unsafe"
+
+	"github.com/golang/glog"
 )
+
+// Init does the common initialization needed in a command tool. ptr
+// is a pointer to an argument struct (see ParseFlagsAndArgs()).
+func Init(ptr interface{}) {
+	command := strings.Join(os.Args, " ")
+	// When using glog, I would like to log to stderr by default.
+	if f := flag.Lookup("logtostderr"); f != nil {
+		f.Value.Set("true")
+		f.DefValue = "true"
+	}
+	ParseFlagsAndArgs(ptr)
+	glog.Info("Command: ", command)
+}
 
 // AddFlags adds flags to fs from ptr. ptr must be a pointer to a
 // struct type. Every exported field in the struct is added as a
@@ -60,11 +75,6 @@ func ParseFlagsAndArgs(ptr interface{}) {
 	flag.Usage = func() {
 		CombinedUsage(os.Args[0], ptr, flag.PrintDefaults)
 	}
-	// When using glog, I would like to log to stderr by default.
-	if f := flag.Lookup("logtostderr"); f != nil {
-		f.Value.Set("true")
-		f.DefValue = "true"
-	}
 	flag.Parse()
 	if err := SetArgs(ptr, flag.Args()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -92,8 +102,10 @@ func ParseFlagsAndArgsWith(name string, ptr interface{}, fs *flag.FlagSet, args 
 
 func CombinedUsage(name string, ptr interface{}, printDefaults func()) {
 	fmt.Fprintf(os.Stderr, "Usage: %s [flags] %s\n", name, strings.Join(FieldNames(ptr), " "))
-	fmt.Fprintf(os.Stderr, "\nArguments:\n")
-	PrintArguments(ptr)
+	if ptr != nil {
+		fmt.Fprintf(os.Stderr, "\nArguments:\n")
+		PrintArguments(ptr)
+	}
 	fmt.Fprintf(os.Stderr, "\nFlags:\n")
 	printDefaults()
 }
